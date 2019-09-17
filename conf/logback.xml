@@ -1,0 +1,31 @@
+<configuration>
+  <!--控制台输出-->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!--<layout>实现类的类型是 PatternLayout 时，class属性可以不用填写-->
+    <encoder  class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}  [%thread] %-5level %logger{50} - %msg%n</pattern>
+    </encoder >
+  </appender>
+  <!--文件输出-->
+  <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>/data/logs/java/platform_springboot_all.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <!-- daily rollover -->
+      <fileNamePattern>/data/logs/java/platform_springboot_all/%d{yyyyMMdd}.%i.log.gz</fileNamePattern>
+      <maxFileSize>1GB</maxFileSize>
+      <maxHistory>7</maxHistory>
+      <totalSizeCap>15GB</totalSizeCap>
+
+    </rollingPolicy>
+
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS, GMT+8}  %-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+    </encoder>
+  </appender> 
+
+  <root level="INFO">
+    <appender-ref ref="ROLLING" />
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>

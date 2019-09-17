@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.mybatisMap.dao.OrdersMapperCustom">
+
+    <resultMap id="ordersUserResultMap" type="com.example.mapper.mybatisMap.entity.Orders">
+        <!-- 配置映射的订单信息 -->
+        <!-- id：指定查询列中的唯一标识，如果多个列组成唯一标识，配置多个id  -->
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="number" property="number"/>
+        <result column="createtime" property="createtime"/>
+        <result column="note" property="note"/>
+        <!-- 配置映射的关联的用户信息 -->
+        <!-- association：用于映射关联查询单个对象的信息
+            property：要将关联查询的用户信息映射到Orders中的哪个属性
+         -->
+        <association property="users" javaType="com.example.mapper.mybatisMap.entity.Users">
+            <!-- id:关联查询用户的唯一标识
+                column：指定唯一标识用户信息的列
+                javaType：映射到user的哪个属性
+             -->
+            <id column="id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="sex" property="sex"/>
+            <result column="addr" property="addr"/>
+        </association>
+    </resultMap>
+
+    <resultMap id="ordersAndOrderDetailResultMap" type="orders" extends="ordersUserResultMap">
+        <!-- 订单信息，通过继承得到 -->
+        <!-- 用户信息，通过继承得到 -->
+        <!-- 订单明细信息
+            collection：对关联查询的到的多条记录映射到集合中
+            property：orders中要映射的哪个属性
+            ofType：集合属性中pojo的类型
+         -->
+        <collection property="orderDetail" ofType="com.example.mapper.mybatisMap.entity.Orderdetail">
+            <!-- 主键 -->
+            <id column="id" property="id"/>
+            <!--普通列-->
+            <result column="items_id" property="items_id"/>
+            <result column="items_num" property="items_num"/>
+            <result column="orders_id" property="orders_id"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="usersAndItemsResultMap" type="com.example.mapper.mybatisMap.entity.Users">
+        <!-- 用户信息 -->
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="sex" property="sex"/>
+        <result column="addr" property="addr"/>
+        <!-- 一个用户对应多个订单信息 -->
+        <collection property="orders" ofType="com.example.mapper.mybatisMap.entity.Orders">
+            <id column="id" property="id"/>
+            <result column="user_id" property="user_id"/>
+            <result column="number" property="number"/>
+            <result column="createtime" property="createtime"/>
+            <result column="note" property="note"/>
+            <!-- 一个订单对应多个订单明细信息 -->
+            <collection property="orderDetails" ofType="com.example.mapper.mybatisMap.entity.Orderdetail">
+                <!-- 主键 -->
+                <id column="id" property="id"/>
+                <!--普通列-->
+                <result column="items_id" property="items_id"/>
+                <result column="items_num" property="items_num"/>
+                <result column="orders_id" property="orders_id"/>
+                <!-- 一个订单明细对应一条商品信息 -->
+                <association property="items" javaType="com.example.mapper.mybatisMap.entity.Items">
+                    <id column="id" property="id"/>
+                    <result column="name" property="name"/>
+                    <result column="detail" property="detail"/>
+                    <result column="price" property="price"/>
+                </association>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="findOrdersUser" resultType="com.example.mapper.mybatisMap.entity.OrdersCustom">
+        select orders.*,users.username,users.sex,users.addr from orders,users WHERE orders.user_id=users.id
+    </select>
+
+    <select id="findOrdersUserResultMap" resultMap="ordersUserResultMap">
+        select orders.*,users.username,users.sex,users.addr from orders,users WHERE orders.user_id=users.id
+    </select>
+
+    <select id="findOrdersAndOrderDetailResultMap" resultMap="ordersAndOrderDetailResultMap">
+        select
+        orders.*,
+        users.username,
+        users.sex,
+        users.addr,
+        orderdetail.id,
+        orderdetail.items_id,
+        orderdetail.items_num,
+        orderdetail.orders_id
+        from
+        orders,
+        users,
+        orderdetail
+        where
+        orders.user_id=users.id
+        and
+        orders.id=orderdetail.orders_id
+    </select>
+
+    <select id="findUsersAndItemsResultMap" resultMap="usersAndItemsResultMap">
+        select
+        orders.*,
+        users.username,
+        users.sex,
+        users.addr,
+        orderdetail.id,
+        orderdetail.items_id,
+        orderdetail.items_num,
+        orderdetail.orders_id,
+        items.name,
+        items.detail,
+        items.price
+        from
+        orders,
+        users,
+        orderdetail,
+        items
+        where
+        orders.user_id=users.id
+        and
+        orders.id=orderdetail.orders_id
+        and
+        orderdetail.items_id=items.id
+    </select>
+
+</mapper>
